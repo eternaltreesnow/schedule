@@ -1,0 +1,19 @@
+{
+  "name": "schedule",
+  "version": "1.0.0",
+  "description": "This is a Cron schedule for Starry project.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "schedule"
+  ],
+  "author": "dickzheng",
+  "license": "ISC",
+  "dependencies": {
+    "node-schedule": "^1.2.0",
+    "querystring": "^0.2.0",
+    "request": "^2.79.0"
+  }
+}
