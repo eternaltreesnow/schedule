@@ -17,7 +17,7 @@ let Status = {
  */
 let updateRank = function(draw) {
     let opts = {
-        uri: 'http://intelligent.tpai.qq.com/grade/update/updateTest',
+        uri: 'http://intelligent.tpai.qq.com/grade/update/updateRank',
         code: '123456'
     };
 
@@ -57,7 +57,7 @@ let httpAgent = function(opts, draw, callback) {
 
     // init request options
     let option = {
-        uri: opts.uri || 'http://intelligent.tpai.qq.com/grade/update/updateTest',
+        uri: opts.uri || 'http://intelligent.tpai.qq.com/grade/update/updateRank',
         body: param,
         method: 'POST',
         headers: {
@@ -95,7 +95,7 @@ let httpAgent = function(opts, draw, callback) {
 };
 
 let scheduleFunc = function() {
-    Schedule.scheduleJob('0 50 20 * * *', function() {
+    Schedule.scheduleJob('0 0 12 * * *', function() {
         console.log(new Date());
         updateRank(1);
     });
