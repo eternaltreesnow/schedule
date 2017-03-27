@@ -1,67 +1,64 @@
 'use strict'
-const http = require('http');
 const Request = require('request');
-const schedule = require('node-schedule');
 const querystring = require('querystring');
+const Logger = require('./logger');
+const Schedule = require('node-schedule');
 
-let scheduleFunc = function() {
-    schedule.scheduleJob('1-59 * * * * *', function() {
-        console.log(new Date());
-        updateRank();
-    });
-    schedule.scheduleJob('* * 1 * * *', function() {
-        console.log(new Date());
-    })
+// initial request status
+let Status = {
+    'success': 200,     // 更新成功
+    'end': 100,         // 更新失败，且不再更新
+    'continue': 400,    // 更新失败，需要继续更新
+    'error': 500        // 网络请求错误
 };
 
 /**
  * 更新排名信息
  */
-let updateRank = function() {
+let updateRank = function(draw) {
     let opts = {
-        host: '127.0.0.1',
-        port: 80,
-        path: '/grade/index/updateRank',
-        successText: 'Update Rank Successfully',
-        endText: 'Update Rank end',
-        reTryTimes: 30
+        uri: 'http://intelligent.tpai.qq.com/grade/update/updateTest',
+        code: '123456'
     };
-    httpTemplate(opts);
-};
 
-/**
- * 更新相关参数
- */
-let updateParam = function() {
-    let opts = {
-        host: '127.0.0.1',
-        port: 12345,
-        path: '/Starry/index.php/updateParam',
-        successText: 'Update Params Successfully',
-        endText: 'Update Params end',
-        reTryTimes: 30
-    };
-    httpTemplate(opts);
+    httpAgent(opts, draw, function(res) {
+        if(res.status === Status.success) {
+            Logger.console('Update Rank success');
+        } else if(res.status === Status.end) {
+            Logger.console('Update Rank failed & Update end');
+            Logger.console('Message: ' + res.message);
+        } else if(res.status === Status.continue) {
+            Logger.console('Update Rank failed & Update continue: draw = ' + draw);
+            Logger.console('Message: ' + res.message);
+            draw = +res.draw;
+            if(draw < 6) {
+                setTimeout(function() {
+                    updateRank(draw + 1);
+                }, 10 * 1000);
+            }
+        } else if(res.status === Status.error) {
+            Logger.console('Update Rank failed & Update error');
+            Logger.console(res.message);
+        }
+    });
 };
 
 /**
  * http request template
  * @param  {Object} opts parameters
+ * @param  {Number} draw Http request index
  */
-let httpTemplate = function(opts) {
-    // init request data
-    let param = {
-        code: getCode()
-    };
-    param = querystring.stringify(param);
-    // try times
-    let draw = 1;
+let httpAgent = function(opts, draw, callback) {
+    // init request body
+    let param = querystring.stringify({
+        code: opts.code,
+        draw: draw
+    });
 
     // init request options
     let option = {
-        host: opts.host || '127.0.0.1',
-        port: opts.port || 80,
-        path: opts.path || '/grade/index/updateRank',
+        uri: opts.uri || 'http://intelligent.tpai.qq.com/grade/update/updateTest',
+        body: param,
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -69,48 +66,39 @@ let httpTemplate = function(opts) {
         }
     };
 
+    let result = {};
+
     Request(option, function(error, res, body) {
         if(!error && res.statusCode == 200) {
-            console.log(body);
+            let data = JSON.parse(body);
+
+            if(data.status === 3) {
+                result.status = Status.success;
+            } else if(data.status === 5) {
+                result.status = Status.end;
+            } else {
+                result.status = Status.continue;
+            }
+            result.draw = data.draw;
+            result.message = data.message;
+            callback(result);
         } else {
-            console.error('Update Rank error');
-            console.error(error);
+            result.status = Status.error;
+            if(error) {
+                result.message = error;
+            } else {
+                result.message = res.body;
+            }
+            callback(result);
         }
     });
-
-    // init http request
-    let request = http.request(option, (response) => {
-        response.setEncoding('utf8');
-        response.on('data', function(data) {
-            data = JSON.parse(data);
-            if(data.status === 200) {
-                console.log(new Date(), opts.successText);
-                request.end();
-            } else {
-                console.log(new Date(), data);
-                if(draw < opts.reTryTimes) {
-                    request.write(param);
-                    draw++;
-                } else {
-                    request.end();
-                }
-            }
-        });
-        response.on('end', function() {
-            console.log(new Date(), opts.endText);
-        });
-    });
-
-    // send http request & data
-    request.write(param);
 };
 
-/**
- * 获取调用密钥
- * @return {String} 密钥
- */
-let getCode = function() {
-    return '123456';
+let scheduleFunc = function() {
+    Schedule.scheduleJob('0 50 20 * * *', function() {
+        console.log(new Date());
+        updateRank(1);
+    });
 };
 
 scheduleFunc();
