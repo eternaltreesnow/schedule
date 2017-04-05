@@ -3,6 +3,7 @@ const Request = require('request');
 const querystring = require('querystring');
 const Logger = require('./logger');
 const Schedule = require('node-schedule');
+const MD5 = require('md5');
 
 // initial request status
 let Status = {
@@ -16,9 +17,11 @@ let Status = {
  * 更新排名信息
  */
 let updateRank = function(draw) {
+    let date = +new Date();
     let opts = {
         uri: 'http://intelligent.tpai.qq.com/grade/update/updateRank',
-        code: '123456'
+        date: date,
+        code: getCode(date, 'update')
     };
 
     httpAgent(opts, draw, function(res) {
@@ -34,11 +37,63 @@ let updateRank = function(draw) {
             if(draw < 6) {
                 setTimeout(function() {
                     updateRank(draw + 1);
-                }, 10 * 1000);
+                }, 5 * 60 * 1000);
             }
         } else if(res.status === Status.error) {
             Logger.console('Update Rank failed & Update error');
             Logger.console(res.message);
+        }
+    });
+};
+
+/**
+ * 备份Starry日志
+ */
+let uploadLogStarry = function(draw) {
+    let date = +new Date();
+    let opts = {
+        uri: 'http://intelligent.tpai.qq.com/grade/update/uploadInfoToCos',
+        date: date,
+        code: getCode(date, 'log')
+    };
+
+    httpAgent(opts, draw, function(res) {
+        if(res.status === Status.success) {
+            Logger.console('Upload Starry Log success');
+        } else if(res.status === Status.end) {
+            Logger.console('Upload Starry Log failed');
+            Logger.console('Message: ' + res.message);
+        } else if(res.status === Status.error) {
+            Logger.console('Upload Starry Log failed & Upload error');
+            Logger.console(res.message);
+        } else {
+            Logger.console(res);
+        }
+    });
+};
+
+/**
+ * 备份starry-console日志
+ */
+let uploadLogConsole = function(draw) {
+    let date = +new Date();
+    let opts = {
+        uri: 'http://intelligent.tpai.qq.com/starry-console/index/index/uploadInfoToCos',
+        date: date,
+        code: getCode(date, 'log')
+    };
+
+    httpAgent(opts, draw, function(res) {
+        if(res.status === Status.success) {
+            Logger.console('Upload Console Log success');
+        } else if(res.status === Status.end) {
+            Logger.console('Upload Console Log failed');
+            Logger.console('Message: ' + res.message);
+        } else if(res.status === Status.error) {
+            Logger.console('Upload Console Log failed & Upload error');
+            Logger.console(res.message);
+        } else {
+            Logger.console(res);
         }
     });
 };
@@ -52,6 +107,7 @@ let httpAgent = function(opts, draw, callback) {
     // init request body
     let param = querystring.stringify({
         code: opts.code,
+        date: opts.date,
         draw: draw
     });
 
@@ -95,10 +151,21 @@ let httpAgent = function(opts, draw, callback) {
 };
 
 let scheduleFunc = function() {
-    Schedule.scheduleJob('0 0 12 * * *', function() {
+    Schedule.scheduleJob('0 20 12 * * *', function() {
         console.log(new Date());
         updateRank(1);
     });
+
+    Schedule.scheduleJob('0 0 1 * * *', function() {
+        console.log(new Date());
+        uploadLogStarry(1);
+        uploadLogConsole(1);
+    });
 };
 
-scheduleFunc();
+let getCode = function(date, type) {
+    return MD5(date + type + 'workflow');
+};
+
+// scheduleFunc();
+uploadLogConsole(1);

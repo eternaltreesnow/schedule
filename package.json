@@ -12,6 +12,7 @@
   "author": "dickzheng",
   "license": "ISC",
   "dependencies": {
+    "md5": "^2.2.1",
     "node-schedule": "^1.2.0",
     "querystring": "^0.2.0",
     "request": "^2.79.0"
