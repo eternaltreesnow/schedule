@@ -167,5 +167,4 @@ let getCode = function(date, type) {
     return MD5(date + type + 'workflow');
 };
 
-// scheduleFunc();
-uploadLogConsole(1);
+scheduleFunc();
