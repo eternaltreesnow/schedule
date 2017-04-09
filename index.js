@@ -151,7 +151,7 @@ let httpAgent = function(opts, draw, callback) {
 };
 
 let scheduleFunc = function() {
-    Schedule.scheduleJob('0 03 17 * * *', function() {
+    Schedule.scheduleJob('0 20 22 * * *', function() {
         console.log(new Date());
         updateRank(1);
     });
