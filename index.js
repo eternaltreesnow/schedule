@@ -151,7 +151,7 @@ let httpAgent = function(opts, draw, callback) {
 };
 
 let scheduleFunc = function() {
-    Schedule.scheduleJob('0 20 12 * * *', function() {
+    Schedule.scheduleJob('0 03 17 * * *', function() {
         console.log(new Date());
         updateRank(1);
     });
@@ -167,4 +167,78 @@ let getCode = function(date, type) {
     return MD5(date + type + 'workflow');
 };
 
+let testSchedule = function() {
+    Schedule.scheduleJob('0 30 11 * * *', function() {
+        console.log(new Date());
+        updateRank(6);
+    });
+
+    Schedule.scheduleJob('0 0 12 * * *', function() {
+        console.log(new Date());
+        updateRank(6);
+    });
+
+    Schedule.scheduleJob('0 30 12 * * *', function() {
+        console.log(new Date());
+        updateRank(6);
+    });
+
+    Schedule.scheduleJob('0 0 13 * * *', function() {
+        console.log(new Date());
+        updateRank(6);
+    });
+
+    Schedule.scheduleJob('0 30 13 * * *', function() {
+        console.log(new Date());
+        updateRank(6);
+    });
+
+    Schedule.scheduleJob('0 0 14 * * *', function() {
+        console.log(new Date());
+        updateRank(6);
+    });
+
+    Schedule.scheduleJob('0 30 14 * * *', function() {
+        console.log(new Date());
+        updateRank(6);
+    });
+
+    Schedule.scheduleJob('0 0 15 * * *', function() {
+        console.log(new Date());
+        updateRank(6);
+    });
+
+    Schedule.scheduleJob('0 30 15 * * *', function() {
+        console.log(new Date());
+        updateRank(6);
+    });
+
+    Schedule.scheduleJob('0 0 16 * * *', function() {
+        console.log(new Date());
+        updateRank(6);
+    });
+
+    Schedule.scheduleJob('0 30 16 * * *', function() {
+        console.log(new Date());
+        updateRank(6);
+    });
+
+    Schedule.scheduleJob('0 0 17 * * *', function() {
+        console.log(new Date());
+        updateRank(6);
+    });
+
+    Schedule.scheduleJob('0 30 17 * * *', function() {
+        console.log(new Date());
+        updateRank(6);
+    });
+
+    Schedule.scheduleJob('0 0 18 * * *', function() {
+        console.log(new Date());
+        updateRank(6);
+    });
+};
+
+// testSchedule();
 scheduleFunc();
+// updateRank(6);
