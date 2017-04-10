@@ -168,6 +168,11 @@ let getCode = function(date, type) {
 };
 
 let testSchedule = function() {
+    Schedule.scheduleJob('0 30 9 * * *', function() {
+        console.log(new Date());
+        console.log('Test schedule begin!');
+    });
+
     Schedule.scheduleJob('0 50 9 * * *', function() {
         console.log(new Date());
         updateRank(6);
