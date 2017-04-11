@@ -270,6 +270,6 @@ let testSchedule = function() {
     });
 };
 
-testSchedule();
-// scheduleFunc();
+// testSchedule();
+scheduleFunc();
 // updateRank(6);
