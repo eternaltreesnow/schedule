@@ -10,7 +10,8 @@ let Status = {
     'success': 200,     // 更新成功
     'end': 100,         // 更新失败，且不再更新
     'continue': 400,    // 更新失败，需要继续更新
-    'error': 500        // 网络请求错误
+    'error': 500,       // 网络请求错误
+    'smtpError': 600,   // 发送邮件错误
 };
 
 /**
@@ -78,7 +79,7 @@ let uploadLogStarry = function(draw) {
 let uploadLogConsole = function(draw) {
     let date = +new Date();
     let opts = {
-        uri: 'http://intelligent.tpai.qq.com/starry-console/index/index/uploadInfoToCos',
+        uri: 'http://algo.tpai.qq.com/starry-console/index/index/uploadInfoToCos',
         date: date,
         code: getCode(date, 'log')
     };
@@ -113,7 +114,7 @@ let httpAgent = function(opts, draw, callback) {
 
     // init request options
     let option = {
-        uri: opts.uri || 'http://intelligent.tpai.qq.com/grade/update/updateRank',
+        uri: opts.uri || 'http://algo.tpai.qq.com/grade/update/updateRank',
         body: param,
         method: 'POST',
         headers: {
@@ -126,18 +127,33 @@ let httpAgent = function(opts, draw, callback) {
 
     Request(option, function(error, res, body) {
         if(!error && res.statusCode == 200) {
-            let data = JSON.parse(body);
-
-            if(data.status === 3) {
-                result.status = Status.success;
-            } else if(data.status === 5) {
-                result.status = Status.end;
-            } else {
+            if(body.indexOf('SMTP') > -1) {
                 result.status = Status.continue;
+                result.draw = 5;
+                result.message = 'SMTP error';
+                callback(result);
+            } else {
+                try {
+                    let data = JSON.parse(body);
+                    if(data.status === 3) {
+                        result.status = Status.success;
+                    } else if(data.status === 5) {
+                        result.status = Status.end;
+                    } else {
+                        result.status = Status.continue;
+                    }
+                    result.draw = data.draw;
+                    result.message = data.message;
+                    callback(result);
+                } catch(error) {
+                    Logger.console('Error: ');
+                    Logger.console(error);
+                    result.status = Status.continue;
+                    result.draw = 5;
+                    result.message = error;
+                    callback(result);
+                }
             }
-            result.draw = data.draw;
-            result.message = data.message;
-            callback(result);
         } else {
             result.status = Status.error;
             if(error) {
