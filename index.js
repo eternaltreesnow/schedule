@@ -19,7 +19,7 @@ let Status = {
 let updateRank = function(draw) {
     let date = +new Date();
     let opts = {
-        uri: 'http://intelligent.tpai.qq.com/grade/update/updateRank',
+        uri: 'http://algo.tpai.qq.com/grade/update/updateRank',
         date: date,
         code: getCode(date, 'update')
     };
@@ -52,7 +52,7 @@ let updateRank = function(draw) {
 let uploadLogStarry = function(draw) {
     let date = +new Date();
     let opts = {
-        uri: 'http://intelligent.tpai.qq.com/grade/update/uploadInfoToCos',
+        uri: 'http://algo.tpai.qq.com/grade/update/uploadInfoToCos',
         date: date,
         code: getCode(date, 'log')
     };
